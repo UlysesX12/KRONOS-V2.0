@@ -1,3 +1,5 @@
+// Copyright (c) 2026 José Luis Cabañas (JLC / UlysesX12).
+// Todos los derechos reservados sobre las aportaciones propias. Véase LICENSE.md.
 using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
@@ -33,7 +35,8 @@ public sealed class MainWindow : Window
         Background = Brush.Parse("#101823");
         var header = new StackPanel { Spacing = 5, Children = {
             new TextBlock { Text = "K R O N O S   /   V 2.0", FontSize = 27, FontWeight = FontWeight.Bold, Foreground = Brush.Parse("#54D5CB") },
-            new TextBlock { Text = "Casos · Evidencias · Verificación · Informe técnico", Foreground = Brushes.LightGray }
+            new TextBlock { Text = "Casos · Evidencias · Verificación · Informe técnico", Foreground = Brushes.LightGray },
+            new TextBlock { Text = "© 2026 José Luis Cabañas (JLC / UlysesX12) · Derechos reservados sobre las aportaciones propias", Foreground = Brushes.LightGray, FontSize = 12, TextWrapping = TextWrapping.Wrap }
         }};
         var createBar = new WrapPanel { Orientation = Orientation.Horizontal };
         createBar.Children.Add(caseId); createBar.Children.Add(operatorName);

@@ -22,7 +22,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Fallaron las pruebas de módulos V1.' }
 if ($Publish) {
     $target = Join-Path $projectRoot "artifacts/$Runtime"
     Invoke-Sdk @('publish','src/Kronos.Desktop','-c','Release','-r',$Runtime,'--self-contained','true','-o',$target,'-p:PublishReadyToRun=false',"-p:NuGetLockFilePath=packages.$Runtime.lock.json")
-    Copy-Item -LiteralPath 'README.md','docs/THIRD_PARTY_NOTICES.md' -Destination $target
+    Copy-Item -LiteralPath 'README.md','AUTHORS.md','LICENSE.md','docs/THIRD_PARTY_NOTICES.md' -Destination $target
     Copy-Item -LiteralPath 'docs' -Destination $target -Recurse -Force
     Copy-Item -LiteralPath 'vendor/PROVENANCE.md','vendor/PROVENANCE_SHA256.csv' -Destination (Join-Path $target 'vendor')
     $licenses = Join-Path $target 'licenses'

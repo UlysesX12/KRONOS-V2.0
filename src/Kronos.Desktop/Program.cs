@@ -1,3 +1,5 @@
+// Copyright (c) 2026 José Luis Cabañas (JLC / UlysesX12).
+// Todos los derechos reservados sobre las aportaciones propias. Véase LICENSE.md.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;

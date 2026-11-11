@@ -7,4 +7,4 @@
 - Windows PowerShell: componente del sistema Windows, no redistribuido.
 - Scripts KRONOS V1: copyright JLC, avisos originales conservados. Véase `vendor/PROVENANCE.md`.
 
-No se ha asignado una licencia pública nueva al código del proyecto. Revisar los avisos y condiciones de cada componente al preparar una distribución externa.
+Las aportaciones propias a KRONOS están sujetas al aviso de derechos reservados de `LICENSE.md`, con créditos en `AUTHORS.md`. Este aviso no modifica las licencias de los componentes de terceros. Revisar sus avisos y condiciones al preparar una distribución externa.

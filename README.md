@@ -1,5 +1,10 @@
 # KRONOS V2.0
 
+**Proyecto de José Luis Cabañas (JLC / UlysesX12).**
+Copyright © 2026 José Luis Cabañas. Todos los derechos reservados sobre las aportaciones propias.
+Consulte [autoría y créditos](AUTHORS.md) y [condiciones de uso](LICENSE.md).
+Dar crédito no concede por sí solo permiso de reutilización o distribución.
+
 Primera versión funcional de escritorio en español, con C#/.NET 10 y Avalonia 11.3.22. Windows, macOS y Linux comparten núcleo e interfaz; la adquisición V1 sigue siendo exclusiva de Windows.
 
 ## Inicio en Windows
