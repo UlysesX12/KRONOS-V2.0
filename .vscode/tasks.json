@@ -1,0 +1,69 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "KRONOS: Compilar",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "Kronos.sln", "-c", "Release"],
+      "windows": {
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/dev.ps1", "-Action", "Build"]
+      },
+      "options": { "cwd": "${workspaceFolder}", "env": { "AVALONIA_TELEMETRY_OPTOUT": "1", "DOTNET_CLI_TELEMETRY_OPTOUT": "1" } },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "KRONOS: Probar",
+      "type": "process",
+      "command": "sh",
+      "args": ["scripts/test.sh"],
+      "windows": {
+        "command": "powershell.exe",
+        "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/dev.ps1", "-Action", "Test"]
+      },
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "KRONOS: Abrir aplicacion Windows",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/dev.ps1", "-Action", "Run"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "KRONOS: Probar dentro de Docker",
+      "dependsOrder": "sequence",
+      "dependsOn": ["KRONOS: Construir contenedor", "KRONOS: Ejecutar pruebas Docker"],
+      "problemMatcher": []
+    },
+    {
+      "label": "KRONOS: Construir contenedor",
+      "type": "process",
+      "command": "docker",
+      "args": ["build", "-f", ".devcontainer/Dockerfile", "-t", "kronos-dev", "."],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "KRONOS: Ejecutar pruebas Docker",
+      "type": "process",
+      "command": "docker",
+      "args": ["run", "--rm", "-v", "${workspaceFolder}:/workspaces/kronos", "-w", "/workspaces/kronos", "kronos-dev", "sh", "scripts/test.sh"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "KRONOS: Sincronizar historial GitHub Windows",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/sync-git.ps1"],
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    }
+  ]
+}

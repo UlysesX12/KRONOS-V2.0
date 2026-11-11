@@ -29,6 +29,7 @@ jobs:
       - run: dotnet run --project tests/Kronos.SmokeTests -c Release --no-build
       - run: dotnet run --project tests/Kronos.DesktopTests -c Release --no-build
       - run: python tests/test_legacy.py
+      - run: python tests/test_sync_git.py
   container:
     runs-on: ubuntu-24.04
     steps:

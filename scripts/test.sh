@@ -8,3 +8,4 @@ dotnet build Kronos.sln -c Release --no-restore
 dotnet run --project tests/Kronos.SmokeTests -c Release --no-build
 dotnet run --project tests/Kronos.DesktopTests -c Release --no-build
 python3 tests/test_legacy.py
+python3 tests/test_sync_git.py

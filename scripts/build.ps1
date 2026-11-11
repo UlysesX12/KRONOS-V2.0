@@ -19,6 +19,8 @@ Invoke-Sdk @('run','--project','tests/Kronos.DesktopTests','-c','Release','--no-
 $pythonCmd = if (Get-Command python -ErrorAction SilentlyContinue) { 'python' } else { 'python3' }
 & $pythonCmd 'tests/test_legacy.py'
 if ($LASTEXITCODE -ne 0) { throw 'Fallaron las pruebas de módulos V1.' }
+& $pythonCmd 'tests/test_sync_git.py'
+if ($LASTEXITCODE -ne 0) { throw 'Fallaron las pruebas de sincronizacion Git.' }
 if ($Publish) {
     $target = Join-Path $projectRoot "artifacts/$Runtime"
     Invoke-Sdk @('publish','src/Kronos.Desktop','-c','Release','-r',$Runtime,'--self-contained','true','-o',$target,'-p:PublishReadyToRun=false',"-p:NuGetLockFilePath=packages.$Runtime.lock.json")

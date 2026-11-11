@@ -7,6 +7,8 @@ Dar crédito no concede por sí solo permiso de reutilización o distribución.
 
 Primera versión funcional de escritorio en español, con C#/.NET 10 y Avalonia 11.3.22. Windows, macOS y Linux comparten núcleo e interfaz; la adquisición V1 sigue siendo exclusiva de Windows.
 
+**VS Code:** abre `Abrir-KRONOS-VSCode.cmd` en esta carpeta de Windows y ejecuta las tareas **KRONOS: Probar** o **KRONOS: Abrir aplicacion Windows**. Para ejecución aislada, usa **KRONOS: Probar dentro de Docker**. [Guía paso a paso y sincronización de Git](docs/VSCODE.md).
+
 ## Inicio en Windows
 
 Si acabas de clonar desde GitHub, los binarios y el SDK local no se incluyen en el repositorio. Prepara primero la publicación siguiendo **Desarrollo reproducible**; necesitas el SDK indicado en `global.json` o un entorno de compilación compatible.
