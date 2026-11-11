@@ -1,0 +1,7 @@
+.git
+.tools
+artifacts
+**/bin
+**/obj
+cases
+.vs
