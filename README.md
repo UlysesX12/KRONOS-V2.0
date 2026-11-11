@@ -9,6 +9,8 @@ Primera versión funcional de escritorio en español, con C#/.NET 10 y Avalonia 
 
 ## Inicio en Windows
 
+Si acabas de clonar desde GitHub, los binarios y el SDK local no se incluyen en el repositorio. Prepara primero la publicación siguiendo **Desarrollo reproducible**; necesitas el SDK indicado en `global.json` o un entorno de compilación compatible.
+
 Abre `Iniciar-KRONOS.cmd` o `artifacts/win-x64/Kronos.Desktop.exe`. La publicación Windows incluye el runtime .NET y no requiere Docker, SDK ni Python para gestionar casos, importar/verificar archivos y generar informes. Los módulos V1 de análisis sí requieren Python 3 accesible (puede indicarse su ruta en la interfaz); la adquisición/verificación V1 usa Windows PowerShell.
 
 1. Introduce un identificador y operador; pulsa **Crear caso** y selecciona la carpeta de destino. También puedes abrir un `case.kronos.json` existente.
@@ -48,7 +50,7 @@ Documentación: `docs/VALIDACION.md`, `docs/THIRD_PARTY_NOTICES.md`, `vendor/PRO
 
 ## GitHub y validación en contenedor
 
-`.github/workflows/validate.yml` prepara compilación y pruebas en Windows y Ubuntu, y un trabajo que construye la imagen de desarrollo y ejecuta las pruebas dentro de ella. Su resultado solo estará disponible después de subir el proyecto a GitHub. `.gitattributes` conserva los módulos V1 byte a byte para mantener válidos los hashes de procedencia.
+`.github/workflows/validate.yml` prepara compilación y pruebas en Windows y Ubuntu, y un trabajo que construye la imagen de desarrollo y ejecuta las pruebas dentro de ella. Consulta los resultados de las ejecuciones en [GitHub Actions](https://github.com/UlysesX12/KRONOS-V2.0/actions); la configuración por sí sola no acredita que hayan pasado. `.gitattributes` conserva los módulos V1 byte a byte para mantener válidos los hashes de procedencia.
 
 Para probar manualmente el contenedor desde un terminal con acceso a Docker:
 
@@ -58,3 +60,7 @@ docker run --rm -v "${PWD}:/workspaces/kronos" -w /workspaces/kronos kronos-dev 
 ```
 
 Estas pruebas no requieren escritorio gráfico. La interfaz Avalonia se prueba en modo headless; abrir una ventana visible desde el contenedor requiere configurar acceso a un servidor gráfico. El contenedor aísla las dependencias, pero el montaje de esta carpeta permite que compilaciones y cambios de archivos se reflejen en el anfitrión. En esta sesión el SDK local y la publicación Windows se ejecutaron en el anfitrión; no se ha validado todavía la ejecución dentro de Docker.
+
+## Más proyectos
+
+Consulta el [catálogo de proyectos públicos](https://github.com/UlysesX12/WebSite/blob/main/docs/PROYECTOS.md).
