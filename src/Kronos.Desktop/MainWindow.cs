@@ -21,9 +21,9 @@ public sealed partial class MainWindow : Window
     private readonly ListBox evidenceList = new() { MinHeight = 200 };
     private readonly TextBlock title = new() { Text = "Ningún caso abierto", FontSize = 22, FontWeight = FontWeight.SemiBold };
     private readonly TextBlock summary = new() { Text = "Crea un caso o abre un archivo case.kronos.json para comenzar.", TextWrapping = TextWrapping.Wrap };
-    private readonly TextBlock status = new() { Text = "Preparado · KRONOS V2.0 · primera versión", TextWrapping = TextWrapping.Wrap };
+    private readonly TextBlock status = new() { Text = "Preparado · KRONOS V2.0", TextWrapping = TextWrapping.Wrap };
     private readonly ProgressBar progress = new() { IsIndeterminate = true, IsVisible = false, Height = 3 };
-    private readonly CheckBox consent = new() { Content = "Autorizo la adquisición Windows en este equipo (sin RAM).", IsChecked = false };
+    private readonly CheckBox consent = new() { Content = "Autorizo capturar datos del equipo actual (sin RAM).", IsChecked = false };
     private readonly TextBox python = new() { Text = DefaultPython(), Watermark = "Ruta del intérprete Python 3" };
     private readonly List<Button> buttons = [];
     private bool busy;
@@ -33,12 +33,11 @@ public sealed partial class MainWindow : Window
     public MainWindow(CaseService? initialCase = null)
     {
         Title = "KRONOS V2.0 — Laboratorio forense";
-        Width = 1200; Height = 850; MinWidth = 900; MinHeight = 650;
+        Width = 1280; Height = 850; MinWidth = 1000; MinHeight = 700; WindowState = WindowState.Maximized;
         Background = Brush.Parse("#101823");
         var header = new StackPanel { Spacing = 5, Children = {
-            new TextBlock { Text = "K R O N O S   /   V 2.0", FontSize = 27, FontWeight = FontWeight.Bold, Foreground = Brush.Parse("#54D5CB") },
-            new TextBlock { Text = "Casos · Evidencias · Verificación · Informe técnico", Foreground = Brushes.LightGray },
-            new TextBlock { Text = "© 2026 José Luis Cabañas (JLC / UlysesX12) · VSL 1.0 · Motor RAM: Volatility Foundation", Foreground = Brushes.LightGray, FontSize = 12, TextWrapping = TextWrapping.Wrap }
+            new TextBlock { Text = "K R O N O S   /   V 2.0", FontSize = 24, FontWeight = FontWeight.Bold, Foreground = Brush.Parse("#54D5CB") },
+            new TextBlock { Text = "© 2026 José Luis Cabañas (JLC / UlysesX12) · VSL 1.0 · Motor RAM: Volatility Foundation", Foreground = Brushes.LightGray, FontSize = 11, TextWrapping = TextWrapping.Wrap }
         }};
         var createBar = new WrapPanel { Orientation = Orientation.Horizontal };
         createBar.Children.Add(caseId); createBar.Children.Add(operatorName);
@@ -61,7 +60,7 @@ public sealed partial class MainWindow : Window
             Action("Analizar carpeta de artefactos", AnalyzeLegacy),
             new TextBlock { Text = "Adquisición Windows", FontSize = 19 },
             new TextBlock { Text = "Requiere Windows y ejecutar KRONOS como administrador. Recoge artefactos del equipo anfitrión con el perfil Triage. La captura RAM no está disponible: no se incluye WinPmem. Se solicitará una carpeta de destino, sin ejecutar elevación automática.", TextWrapping = TextWrapping.Wrap },
-            consent, Action("Adquirir artefactos Windows…", Capture),
+            consent, Action("Capturar datos del equipo actual…", Capture),
             new TextBlock { Text = "RAM Windows: usa la pestaña Análisis RAM. Pendiente: imágenes de disco, extracción móvil y adquisición específica para macOS/Linux. Los módulos de artefactos mantienen sus propias dependencias y cobertura.", TextWrapping = TextWrapping.Wrap, Foreground = Brushes.LightGray }
         }};
         var tabs = new TabControl { ItemsSource = new[] {
@@ -71,7 +70,7 @@ public sealed partial class MainWindow : Window
             new TabItem { Header = "Módulos y adquisición", Content = new ScrollViewer { Content = modules } },
             new TabItem { Header = "Resultados y actividad", Content = results }
         }};
-        var grid = new Grid { Margin = new Thickness(24), RowDefinitions = new RowDefinitions("Auto,Auto,Auto,Auto,*,Auto,Auto"), RowSpacing = 15 };
+        var grid = new Grid { Margin = new Thickness(16), RowDefinitions = new RowDefinitions("Auto,Auto,Auto,Auto,*,Auto,Auto"), RowSpacing = 8 };
         Add(grid, header, 0); Add(grid, createBar, 1); Add(grid, title, 2); Add(grid, summary, 3);
         Add(grid, tabs, 4); Add(grid, progress, 5); Add(grid, status, 6); Content = grid;
         search.TextChanged += (_, _) => RefreshEvidence();
@@ -107,7 +106,7 @@ public sealed partial class MainWindow : Window
             foreach (var b in buttons) b.IsEnabled = false;
             try { status.Text = "En curso…"; await operation(); status.Text = completionMessage ?? "Operación completada."; RefreshEvidence(); }
             catch (OperationCanceledException) { status.Text = "Operación cancelada. Consulta los registros conservados."; RefreshEvidence(); }
-            catch (Exception ex) { status.Text = "Error: " + ex.Message; results.Text = $"{DateTimeOffset.UtcNow:O}\n{ex}\n\n{results.Text}"; }
+            catch (Exception ex) { status.Text = "Error: " + ex.Message; results.Text = $"{DateTimeOffset.UtcNow:O} · {label}\n{ex.Message}\n\n{results.Text}"; }
             finally { busy = false; progress.IsVisible = false; memoryCancel.IsEnabled = false; operationCancellation.Dispose(); operationCancellation = null; foreach (var b in buttons) b.IsEnabled = true; }
         };
         return button;
@@ -216,7 +215,7 @@ public sealed partial class MainWindow : Window
     {
         var c = RequireCase();
         if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Adquisición disponible solamente en Windows.");
-        if (consent.IsChecked != true) throw new InvalidOperationException("Marca la autorización de adquisición antes de continuar.");
+        if (consent.IsChecked != true) throw new InvalidOperationException("Autoriza la captura del equipo actual antes de continuar. Para examinar un volcado descargado, usa Análisis RAM.");
         var parent = await Folder("Destino de la adquisición Windows"); if (parent is null) return;
         consent.IsChecked = false;
         await Legacy("powershell.exe", ["-NoProfile", "-NonInteractive", "-File", Path.Combine(LegacyRunner.VendorRoot, "Kronos.ps1"), "-CaseId", c.Document.Id,

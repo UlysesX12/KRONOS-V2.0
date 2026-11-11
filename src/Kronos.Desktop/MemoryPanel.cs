@@ -7,6 +7,8 @@ using Avalonia.Data.Converters;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using Avalonia.Controls.Templates;
+using Avalonia.Controls.Primitives;
 using Kronos.Core;
 
 namespace Kronos.Desktop;
@@ -24,10 +26,18 @@ public sealed partial class MainWindow
     }
     private readonly ComboBox memoryEvidence = new() { PlaceholderText = "Selecciona una evidencia importada", HorizontalAlignment = HorizontalAlignment.Stretch };
     private readonly ComboBox memoryRuns = new() { PlaceholderText = "Análisis guardados del caso", HorizontalAlignment = HorizontalAlignment.Stretch };
-    private readonly ComboBox memoryModules = new() { PlaceholderText = "Módulo y estado", HorizontalAlignment = HorizontalAlignment.Stretch };
+    private readonly TabStrip memoryModules = new()
+    {
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        ItemTemplate = new FuncDataTemplate<MemoryModule>((module, _) => new TextBlock
+        {
+            Text = module is null ? "" : $"{(module.Plugin.Contains("pslist") ? "Procesos" : module.Plugin.Contains("cmdline") ? "Comandos" : module.Plugin.Contains("netscan") ? "Red" : "Equipo")} ({module.Rows:N0})",
+            FontSize = 15, Margin = new Thickness(6, 2)
+        })
+    };
     private readonly TextBox memoryQuery = new() { Watermark = "Buscar PID, proceso, dirección IP o texto…" };
     private readonly TextBlock memoryHint = new() { Text = "Crea un caso, importa el volcado y ejecuta el análisis Windows.", TextWrapping = TextWrapping.Wrap };
-    private readonly DataGrid memoryGrid = new() { IsReadOnly = true, AutoGenerateColumns = false, CanUserResizeColumns = true, GridLinesVisibility = DataGridGridLinesVisibility.Horizontal, MinHeight = 150 };
+    private readonly DataGrid memoryGrid = new() { IsReadOnly = true, AutoGenerateColumns = false, CanUserResizeColumns = true, GridLinesVisibility = DataGridGridLinesVisibility.Horizontal, MinHeight = 150, FontSize = 15, RowHeight = 32, ColumnHeaderHeight = 36 };
     private readonly CheckBox memoryOffline = new() { Content = "Sin conexión: usar solo símbolos disponibles", IsChecked = false };
     private readonly Button memoryCancel = new() { Content = "Cancelar", IsEnabled = false, Margin = new Thickness(0, 3, 10, 3) };
     private MemoryTable? memoryTable;
@@ -39,34 +49,52 @@ public sealed partial class MainWindow
         actions.Children.Add(Action("Importar volcado RAM…", ImportMemory, true));
         actions.Children.Add(Action("Analizar RAM Windows", AnalyzeMemory, true));
         actions.Children.Add(memoryCancel);
-        actions.Children.Add(Action("Abrir carpeta del análisis", () =>
+        var openFolder = Action("Abrir carpeta del análisis", () =>
         {
             var c = RequireCase();
             if (memoryRuns.SelectedItem is not MemoryAnalysis a) throw new InvalidOperationException("Selecciona un análisis guardado.");
             OpenPath(c.ResolveAnalysisPath(a.RelativeDirectory)); return Task.CompletedTask;
-        }));
-        actions.Children.Add(Action("Añadir fila a notas", AddMemoryFinding));
+        });
+        var addFinding = Action("Añadir fila a notas", AddMemoryFinding);
         memoryCancel.Click += (_, _) => operationCancellation?.Cancel();
         memoryRuns.SelectionChanged += (_, _) =>
         {
             memoryLoadGeneration++;
-            memoryModules.ItemsSource = (memoryRuns.SelectedItem as MemoryAnalysis)?.Modules;
-            memoryModules.SelectedIndex = memoryModules.ItemCount > 0 ? 0 : -1;
+            var modules = (memoryRuns.SelectedItem as MemoryAnalysis)?.Modules;
+            memoryModules.ItemsSource = modules;
+            var processes = modules?.FindIndex(m => m.Plugin.Contains("pslist") && m.Status == "CORRECTO") ?? -1;
+            memoryModules.SelectedIndex = processes >= 0 ? processes : memoryModules.ItemCount > 0 ? 0 : -1;
             if (memoryRuns.SelectedItem is MemoryAnalysis run)
                 memoryHint.Text = $"{run.Status} · integridad {run.Integrity} · Volatility {run.EngineVersion}\n{run.Error}";
             else { memoryTable = null; memoryGrid.ItemsSource = null; }
         };
         memoryModules.SelectionChanged += async (_, _) => await LoadMemoryResults();
         memoryQuery.TextChanged += (_, _) => FilterMemory();
-        var controls = new StackPanel { Spacing = 8, Children = {
-            new TextBlock { Text = "Análisis de memoria Windows · Volatility 3", FontSize = 20 },
-            new TextBlock { Text = "Información del sistema, procesos, líneas de comando y conexiones. Trabaja sobre la copia del caso y comprueba SHA-256 antes y después. La compatibilidad depende del volcado y sus símbolos; una extensión no identifica el formato.", TextWrapping = TextWrapping.Wrap },
-            memoryEvidence, actions, memoryOffline,
-            new TextBlock { Text = "Con conexión, el motor puede descargar símbolos de Microsoft usando identificadores técnicos; no envía el volcado. Usa una copia de laboratorio y revisa la cobertura de cada módulo.", FontSize = 12, Foreground = Brushes.LightGray, TextWrapping = TextWrapping.Wrap },
-            memoryRuns, memoryModules, memoryQuery, memoryHint
-        }};
-        var grid = new Grid { RowDefinitions = new RowDefinitions("Auto,*"), RowSpacing = 10 };
+        memoryGrid.DoubleTapped += async (_, _) =>
+        {
+            if (memoryGrid.SelectedItem is not MemoryRow row || memoryModules.SelectedItem is not MemoryModule module) return;
+            var detail = new Window { Title = module.Name + " · Detalle de la fila", Width = 900, Height = 600,
+                MinWidth = 600, MinHeight = 350, WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Content = new TextBox { Margin = new Thickness(16), IsReadOnly = true, AcceptsReturn = true, TextWrapping = TextWrapping.Wrap,
+                    Text = string.Join("\n\n", row.Cells.Select(cell => $"{cell.Key}: {cell.Value}")) + $"\n\nFuente: {module.ResultsPath}\nJSON Pointer: {row.JsonPointer}" } };
+            await detail.ShowDialog(this);
+        };
+        var evidenceRow = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), ColumnSpacing = 10 };
+        evidenceRow.Children.Add(memoryEvidence); Grid.SetColumn(actions, 1); evidenceRow.Children.Add(actions);
+        var historyRow = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*"), ColumnSpacing = 10 };
+        historyRow.Children.Add(new TextBlock { Text = "Análisis guardado:", VerticalAlignment = VerticalAlignment.Center });
+        Grid.SetColumn(memoryRuns, 1); historyRow.Children.Add(memoryRuns);
+        var resultActions = new WrapPanel(); resultActions.Children.Add(addFinding); resultActions.Children.Add(openFolder);
+        var searchRow = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), ColumnSpacing = 10 };
+        searchRow.Children.Add(memoryQuery); Grid.SetColumn(resultActions, 1); searchRow.Children.Add(resultActions);
+        var options = new Expander { Header = "Símbolos y alcance", IsExpanded = false, HorizontalAlignment = HorizontalAlignment.Stretch,
+            Content = new StackPanel { Spacing = 6, Children = { memoryOffline,
+                new TextBlock { Text = "Volatility 3 analiza la copia del caso y comprueba SHA-256 antes y después. Con conexión puede descargar símbolos de Microsoft mediante identificadores técnicos; no envía el volcado. Una extensión no garantiza compatibilidad ni un resultado completo.", FontSize = 12, Foreground = Brushes.LightGray, TextWrapping = TextWrapping.Wrap }
+            } } };
+        var controls = new StackPanel { Spacing = 6, Children = { evidenceRow, historyRow, memoryModules, searchRow, options } };
+        var grid = new Grid { RowDefinitions = new RowDefinitions("Auto,*,Auto"), RowSpacing = 8 };
         grid.Children.Add(controls); Grid.SetRow(memoryGrid, 1); grid.Children.Add(memoryGrid);
+        Grid.SetRow(memoryHint, 2); grid.Children.Add(memoryHint);
         return grid;
     }
     private void RefreshMemory()
@@ -77,8 +105,11 @@ public sealed partial class MainWindow
         memoryEvidence.ItemsSource = choices;
         memoryEvidence.SelectedItem = choices.FirstOrDefault(e => e.Evidence.Id == id) ?? choices.LastOrDefault();
         var selected = (memoryRuns.SelectedItem as MemoryAnalysis)?.Id;
+        var plugin = (memoryModules.SelectedItem as MemoryModule)?.Plugin;
         memoryRuns.ItemsSource = current.Document.MemoryAnalyses.ToList();
         memoryRuns.SelectedItem = current.Document.MemoryAnalyses.FirstOrDefault(a => a.Id == selected) ?? current.Document.MemoryAnalyses.LastOrDefault();
+        if (memoryRuns.SelectedItem is MemoryAnalysis run && run.Id == selected && plugin is not null)
+            memoryModules.SelectedItem = run.Modules.FirstOrDefault(m => m.Plugin == plugin);
     }
     private async Task ImportMemory()
     {
@@ -119,7 +150,7 @@ public sealed partial class MainWindow
                     Binding = new Binding { Converter = new FuncValueConverter<MemoryRow, string>(row => row?.Cells.GetValueOrDefault(key) ?? "") } });
             }
             FilterMemory();
-            memoryHint.Text = $"{module.Name}: {module.Status} · {table.TotalRows:N0} filas · {Math.Min(table.TotalRows, 10000):N0} cargadas · integridad de salida verificada. {run.Error}";
+            memoryHint.Text = $"{module.Name}: {module.Status} · {table.TotalRows:N0} filas · integridad de salida verificada. Doble clic en una fila para ver su contenido completo. {run.Error}";
         }
         catch (Exception ex) { if (generation == memoryLoadGeneration) memoryHint.Text = "No se pueden cargar los resultados: " + ex.Message; }
     }

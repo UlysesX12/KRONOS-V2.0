@@ -19,16 +19,17 @@ def git(*args, check=True):
 def main():
     if Path(git('rev-parse', '--show-toplevel').stdout.strip()).resolve() != ROOT:
         raise RuntimeError('La raiz Git no corresponde al proyecto.')
-    if git('rev-parse', '--verify', '--quiet', 'HEAD', check=False).returncode == 0:
-        print('El repositorio ya tiene commits. No se modifica el historial ni los cambios locales.')
-        print(git('status', '--short').stdout)
-        return
+    has_head = git('rev-parse', '--verify', '--quiet', 'HEAD', check=False).returncode == 0
+    if git('symbolic-ref', '--short', 'HEAD').stdout.strip() != 'main':
+        raise RuntimeError('La sincronizacion solo se permite en main; se conserva la rama actual.')
     if 'origin' in git('remote').stdout.splitlines():
         if git('remote', 'get-url', 'origin').stdout.strip() != REMOTE:
             raise RuntimeError('El remoto origin no corresponde a KRONOS.')
     else:
         git('remote', 'add', 'origin', REMOTE)
     git('fetch', 'origin', 'main')
+    if has_head and git('merge-base', '--is-ancestor', 'HEAD', 'origin/main', check=False).returncode != 0:
+        raise RuntimeError('Hay commits locales que no estan en GitHub. Se conserva todo sin cambiar el historial.')
     paths = git('-c', 'core.quotepath=false', 'ls-tree', '-rz', '--name-only', 'origin/main').stdout.split('\0')
     differences = []
     for relative in filter(None, paths):

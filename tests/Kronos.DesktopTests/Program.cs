@@ -49,6 +49,7 @@ for (var i = 0; i < 300; i++)
     Thread.Sleep(10);
 }
 if (!loaded.GetVisualDescendants().OfType<TextBlock>().Any(t => t.Text == "SYNTHETIC_TEST_PROCESS")) throw new Exception("No muestra filas del análisis guardado en la tabla RAM.");
+if (loaded.GetVisualDescendants().OfType<DataGrid>().Single().Bounds.Height < 200) throw new Exception("La tabla RAM queda demasiado pequeña.");
 Console.WriteLine("OK la tabla RAM muestra filas verificadas de un caso sintético guardado");
 loaded.Close();
 Directory.Delete(fixture, true);

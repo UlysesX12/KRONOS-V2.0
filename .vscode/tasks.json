@@ -41,7 +41,7 @@
       }
     },
     {
-      "label": "KRONOS: Sincronizar historial inicial con GitHub",
+      "label": "KRONOS: Sincronizar archivos ya publicados en GitHub",
       "problemMatcher": [],
       "command": "python3",
       "type": "process",

@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Construir el entorno de desarrollo
-        run: docker build -f .devcontainer/Dockerfile -t kronos-dev .
+        run: docker build --network=host -f .devcontainer/Dockerfile -t kronos-dev .
       - name: Ejecutar las pruebas en el contenedor
         run: docker run --rm -v "$PWD:/workspaces/kronos" -w /workspaces/kronos kronos-dev sh scripts/test.sh
   windows-package:

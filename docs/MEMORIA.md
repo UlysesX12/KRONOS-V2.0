@@ -21,9 +21,9 @@ Selecciona la evidencia y pulsa **Analizar RAM Windows**. El análisis utiliza l
 | Líneas de comando | Información recuperada por `windows.cmdline.CmdLine`. |
 | Conexiones de red | Artefactos de red recuperados por `windows.netscan.NetScan`. No representan conexiones actuales del equipo donde ejecutas KRONOS. |
 
-El selector muestra el estado y número de filas. La tabla permite buscar texto, PID y direcciones IP. Se cargan como máximo 10.000 filas en la vista previa; el JSON completo se conserva. Las salidas mayores de 128 MiB no se cargan en la vista previa y se documentan como incidencia.
+Las pestañas Equipo, Procesos, Comandos y Red muestran el número de filas. Al abrir un análisis se muestran primero los procesos. La tabla permite buscar texto, PID y direcciones IP. Se cargan como máximo 10.000 filas en la vista previa; el JSON completo se conserva. Las salidas mayores de 128 MiB no se cargan en la vista previa y se documentan como incidencia.
 
-Selecciona una fila y pulsa **Añadir fila a notas** para conservar sus valores, plugin, ruta del JSON y JSON Pointer de origen. Completa tu interpretación en **Informe editable**.
+Haz doble clic en una fila para ver todos sus campos y copiar el texto. Selecciona una fila y pulsa **Añadir fila a notas** para conservar sus valores, plugin, ruta del JSON y JSON Pointer de origen. Completa tu interpretación en **Informe editable**.
 
 ## Símbolos y conexión
 

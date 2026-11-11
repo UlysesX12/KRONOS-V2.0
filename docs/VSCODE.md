@@ -26,6 +26,6 @@ Abre `KRONOS.lnk` o `artifacts/win-x64/Kronos.Desktop.exe` desde Windows. No es 
 
 ## Sincronizar la carpeta inicial, una sola vez
 
-Si esta carpeta sigue mostrando todos los archivos como nuevos porque el conector subió los commits sin actualizar el Git local, ejecuta en el Dev Container la tarea **KRONOS: Sincronizar historial inicial con GitHub**.
+Si esta carpeta sigue mostrando todos los archivos como nuevos porque el conector subió los commits sin actualizar el Git local, ejecuta en el Dev Container la tarea **KRONOS: Sincronizar archivos ya publicados en GitHub**.
 
-El script `scripts/sync_git.py` verifica cada archivo frente a `origin/main`. Solo si coinciden y no hay commits locales, establece el historial con `git reset --mixed origin/main`, conservando los archivos. No descarta diferencias, no elimina archivos ni fuerza una subida. La sesión del agente tiene el Git local en solo lectura; esta operación debe ejecutarse desde tu entorno con acceso de escritura.
+El script `scripts/sync_git.py` verifica cada archivo frente a `origin/main`. Solo si coinciden y los commits locales ya están contenidos en GitHub, establece el historial con `git reset --mixed origin/main`, conservando los archivos. No descarta diferencias, no elimina archivos ni fuerza una subida. La sesión del agente tiene el Git local en solo lectura; esta operación debe ejecutarse desde tu entorno con acceso de escritura.

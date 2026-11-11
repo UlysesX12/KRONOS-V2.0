@@ -62,9 +62,20 @@ class SyncGitTests(unittest.TestCase):
             (clean / 'sample.txt').write_text('edicion posterior\n', encoding='utf-8')
             existing = snapshot(clean)
             head = git(clean, 'rev-parse', 'HEAD').stdout
-            self.assertEqual(run_sync(clean).returncode, 0)
+            self.assertNotEqual(run_sync(clean).returncode, 0)
             self.assertEqual(snapshot(clean), existing)
             self.assertEqual(git(clean, 'rev-parse', 'HEAD').stdout, head)
+
+            (remote / 'sample.txt').write_text('contenido nuevo ya publicado\n', encoding='utf-8')
+            git(remote, 'add', '.')
+            git(remote, '-c', 'user.name=Synthetic', '-c', 'user.email=synthetic@example.invalid', 'commit', '-m', 'published update')
+            (clean / 'sample.txt').write_text('contenido nuevo ya publicado\n', encoding='utf-8')
+            before_update = snapshot(clean)
+            result = run_sync(clean)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(git(clean, 'rev-parse', 'HEAD').stdout, git(remote, 'rev-parse', 'HEAD').stdout)
+            self.assertEqual(snapshot(clean), before_update)
+            self.assertEqual(git(clean, 'status', '--porcelain').stdout, '')
 
             different = working_copy('different')
             (different / 'sample.txt').write_text('cambio local importante\n', encoding='utf-8')
