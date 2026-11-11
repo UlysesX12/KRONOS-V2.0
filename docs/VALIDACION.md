@@ -5,9 +5,11 @@ KRONOS incluye gestión de casos, copia y verificación de evidencias, análisis
 ## Pruebas automatizadas
 
 - Núcleo: SHA-256 conocido, origen intacto, copia verificada, persistencia, apertura concurrente, nombres con espacios/tildes, exportación, alteraciones, ausencias, archivos ajenos, rutas fuera del caso y cancelación.
-- RAM: orquestación de cuatro módulos mediante datos sintéticos, referencias JSON Pointer, límite de vista previa, salidas vacías, resultados parciales, rechazo de evidencia alterada, detección de JSON alterado, cancelación, historial e informes.
+- RAM: perfiles de cuatro y catorce módulos mediante datos sintéticos, referencias JSON Pointer, límite de vista previa, salidas vacías, resultados parciales, rechazo de evidencia alterada, detección de JSON alterado, cancelación, historial e informes.
 - Motor real: Volatility instalado y runtime Python empaquetado rechazan un archivo de ceros sintéticos como imagen compatible; no se transforma ese error en resultados válidos.
-- Interfaz headless: cinco pestañas, recuperación tras un error y tabla RAM que muestra filas verificadas de un caso sintético guardado.
+- Interfaz headless: seis pestañas, recuperación tras un error, tabla RAM y tabla del laboratorio con filas verificadas de un caso sintético guardado.
+- Laboratorio: ocho pruebas Python de adaptadores, incluidos offsets, cruce de bloques, SQLite sin modificar, ZIP con rutas peligrosas, GPT 4K/CRC y MBR/NTFS.
+- Motores portátiles reales: Foremost recupera candidatos de una imagen construida; FLOSS encuentra una cadena conocida de un PE compilado para la prueba; ALEAPP interpreta historial Chromium Android e iLEAPP historial Safari iOS sintéticos. Orquestación, hashes, manifiestos, evidencias derivadas y manipulación de resultados se prueban desde el núcleo .NET. Los casos en un volumen distinto del temporal comprueban la transferencia de LEAPP.
 - Módulos de artefactos: base Chromium SQLite sintética, generación de resultados, fuente intacta y detección de alteración.
 - Sincronización Git: repositorios temporales, historial inicial, conservación de archivos, rechazo de diferencias y protección de commits existentes.
 
@@ -23,6 +25,6 @@ La publicación Windows x64 es autocontenida e incorpora Python embebido y el mo
 
 El análisis RAM se limita a los módulos Windows integrados y depende de los símbolos disponibles y del soporte real de Volatility. No se garantiza recuperar todo ni atribuir autoría por coincidencias. El rendimiento no mejora automáticamente por integrar el motor en una interfaz.
 
-La ventana Windows, los selectores del sistema y un volcado compatible requieren prueba manual. Las pruebas headless no certifican toda la interacción gráfica ni el acceso a hardware. No se ha certificado adquisición RAM, dispositivos físicos, extracción móvil, imágenes de disco ni análisis de RAM Linux/macOS.
+La ventana Windows, los selectores del sistema y un volcado compatible requieren prueba manual. Las pruebas headless no certifican toda la interacción gráfica ni el acceso a hardware. Las pruebas móviles y de particiones usan datos construidos, no certifican cobertura de todos los teléfonos o sistemas de archivos. No se ha certificado adquisición RAM, discos físicos, desbloqueo de móviles, reconstrucción RAID, exploración completa de discos ni análisis RAM Linux/macOS. Consulta la cobertura exacta en [Laboratorio](LABORATORIO.md).
 
 El historial del caso no está firmado. Una interrupción abrupta puede dejar un análisis en curso o un archivo de evidencia no registrado; conserva el caso completo y verifica su integridad antes de emitir conclusiones.

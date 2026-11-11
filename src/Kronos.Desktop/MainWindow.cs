@@ -62,11 +62,12 @@ public sealed partial class MainWindow : Window
             new TextBlock { Text = "Adquisición Windows", FontSize = 19 },
             new TextBlock { Text = "Requiere Windows y ejecutar KRONOS como administrador. Recoge artefactos del equipo anfitrión con el perfil Triage. La captura RAM no está disponible: no se incluye WinPmem. Se solicitará una carpeta de destino, sin ejecutar elevación automática.", TextWrapping = TextWrapping.Wrap },
             consent, Action("Capturar datos del equipo actual…", Capture),
-            new TextBlock { Text = "RAM Windows: usa la pestaña Análisis RAM. Pendiente: imágenes de disco, extracción móvil y adquisición específica para macOS/Linux. Los módulos de artefactos mantienen sus propias dependencias y cobertura.", TextWrapping = TextWrapping.Wrap, Foreground = Brushes.LightGray }
+            new TextBlock { Text = "Usa Análisis RAM para Volatility y Laboratorio forense para Foremost, FLOSS, ALEAPP, iLEAPP, ZIP y navegadores. LEAPP interpreta extracciones existentes; no adquiere ni desbloquea teléfonos.", TextWrapping = TextWrapping.Wrap, Foreground = Brushes.LightGray }
         }};
         var tabs = new TabControl { ItemsSource = new[] {
             new TabItem { Header = "Evidencias", Content = new ScrollViewer { Content = evidenceTab } },
             new TabItem { Header = "Análisis RAM", Content = CreateMemoryPanel() },
+            new TabItem { Header = "Laboratorio forense", Content = CreateForensicPanel() },
             new TabItem { Header = "Informe editable", Content = new ScrollViewer { Content = reportTab } },
             new TabItem { Header = "Módulos y adquisición", Content = new ScrollViewer { Content = modules } },
             new TabItem { Header = "Resultados y actividad", Content = results }
@@ -104,11 +105,12 @@ public sealed partial class MainWindow : Window
             completionMessage = null;
             operationCancellation = new CancellationTokenSource();
             memoryCancel.IsEnabled = cancellable;
+            forensicCancel.IsEnabled = cancellable;
             foreach (var b in buttons) b.IsEnabled = false;
             try { status.Text = "En curso…"; await operation(); status.Text = completionMessage ?? "Operación completada."; RefreshEvidence(); }
             catch (OperationCanceledException) { status.Text = "Operación cancelada. Consulta los registros conservados."; RefreshEvidence(); }
             catch (Exception ex) { status.Text = "Error: " + ex.Message; results.Text = $"{DateTimeOffset.UtcNow:O} · {label}\n{ex.Message}\n\n{results.Text}"; }
-            finally { busy = false; progress.IsVisible = false; memoryCancel.IsEnabled = false; operationCancellation.Dispose(); operationCancellation = null; foreach (var b in buttons) b.IsEnabled = true; }
+            finally { busy = false; progress.IsVisible = false; memoryCancel.IsEnabled = false; forensicCancel.IsEnabled = false; operationCancellation.Dispose(); operationCancellation = null; foreach (var b in buttons) b.IsEnabled = true; }
         };
         return button;
     }
@@ -151,6 +153,7 @@ public sealed partial class MainWindow : Window
             .Where(line => line.Contains(filter, StringComparison.OrdinalIgnoreCase)).ToList();
         summary.Text = $"{current.Document.Evidence.Count} evidencias · {current.Root}";
         RefreshMemory();
+        RefreshForensics();
     }
     private async Task Import()
     {
@@ -160,7 +163,8 @@ public sealed partial class MainWindow : Window
         foreach (var file in selected)
         {
             var path = file.TryGetLocalPath(); if (path is null) continue;
-            try { await c.ImportAsync(path, new Progress<string>(s => status.Text = $"{file.Name}: {s}")); }
+            try { await c.ImportAsync(path, new Progress<string>(s => status.Text = $"{file.Name}: {s}"), operationCancellation?.Token ?? CancellationToken.None); }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex) { failures.Add($"{file.Name}: {ex.Message}"); }
         }
         results.Text = failures.Count == 0 ? "Importación finalizada; hashes de origen y copia coincidentes." : string.Join("\n", failures);

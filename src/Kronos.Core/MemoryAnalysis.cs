@@ -169,7 +169,7 @@ public sealed partial class CaseService
         return full;
     }
     public async Task<MemoryAnalysis> AnalyzeMemoryAsync(string evidenceId, IMemoryRunner runner, bool offline,
-        IProgress<string>? progress = null, CancellationToken cancellation = default)
+        IProgress<string>? progress = null, CancellationToken cancellation = default, bool extended = false)
     {
         cancellation.ThrowIfCancellationRequested();
         var evidence = Document.Evidence.Single(e => e.Id == evidenceId);
@@ -190,8 +190,14 @@ public sealed partial class CaseService
                 throw new InvalidDataException("La copia de evidencia no coincide con su SHA-256 registrado. Análisis rechazado.");
             analysis.EntrySha256 = await HashAsync(runner.EntryPath, cancellation);
             analysis.EngineVersion = await runner.GetVersionAsync(directory, cancellation);
-            var plugins = new[] { ("windows.info.Info", "Información del sistema"), ("windows.pslist.PsList", "Procesos"),
+            var plugins = new List<(string, string)> { ("windows.info.Info", "Información del sistema"), ("windows.pslist.PsList", "Procesos"),
                 ("windows.cmdline.CmdLine", "Líneas de comando"), ("windows.netscan.NetScan", "Conexiones de red") };
+            if (extended) plugins.AddRange([
+                ("windows.pstree.PsTree", "Árbol de procesos"), ("windows.psscan.PsScan", "Procesos por exploración"),
+                ("windows.getsids.GetSIDs", "SID y cuentas de procesos"), ("windows.sessions.Sessions", "Sesiones"),
+                ("windows.envars.Envars", "Variables de entorno"), ("windows.filescan.FileScan", "Archivos en memoria"),
+                ("windows.registry.hivelist.HiveList", "Colmenas del registro"), ("windows.registry.userassist.UserAssist", "UserAssist"),
+                ("windows.dlllist.DllList", "Bibliotecas de procesos"), ("windows.malware.malfind.Malfind", "Posible código inyectado (indicio)")]);
             analysis.Modules = plugins.Select(p => new MemoryModule { Plugin = p.Item1, Name = p.Item2,
                 ResultsPath = analysis.RelativeDirectory + "/" + p.Item1 + ".json",
                 LogPath = analysis.RelativeDirectory + "/" + p.Item1 + ".log" }).ToList();

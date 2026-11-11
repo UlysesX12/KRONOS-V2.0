@@ -23,7 +23,16 @@ Invoke-Sdk @('run','--project','tests/Kronos.MemoryTests','-c','Release','--no-b
 if ($LASTEXITCODE -ne 0) { throw 'Fallaron las pruebas de módulos V1.' }
 & $pythonCmd 'tests/test_sync_git.py'
 if ($LASTEXITCODE -ne 0) { throw 'Fallaron las pruebas de sincronizacion Git.' }
+& $pythonCmd 'tests/test_forensics.py'
+if ($LASTEXITCODE -ne 0) { throw 'Fallaron las pruebas de adaptadores forenses.' }
 if ($Publish) {
+    if ($Runtime -eq 'win-x64') {
+        & $pythonCmd (Join-Path $PSScriptRoot 'package-forensics.py')
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudieron preparar las herramientas forenses.' }
+        & $pythonCmd 'tests/test_forensics.py' --fixtures '.tools/forensic-synthetic'
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudieron preparar los datos sintéticos.' }
+        Invoke-Sdk @('run','--project','tests/Kronos.MemoryTests','-c','Release','--no-build','--','--forensics')
+    }
     $target = Join-Path $projectRoot "artifacts/$Runtime"
     Invoke-Sdk @('publish','src/Kronos.Desktop','-c','Release','-r',$Runtime,'--self-contained','true','-o',$target,'-p:PublishReadyToRun=false',"-p:NuGetLockFilePath=packages.$Runtime.lock.json")
     foreach ($obsolete in @('vendor/kronos-v1/KRONOS_GUIA_FACIL.txt','vendor/kronos-v1/KRONOS_USB_SHA256_20261020_195425_578.csv')) {
@@ -41,7 +50,12 @@ if ($Publish) {
         $relativeName = $_.FullName.Substring($env:NUGET_PACKAGES.Length + 1).Replace('\','_').Replace('/','_')
         Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $licenses $relativeName)
     }
-    if ($Runtime -eq 'win-x64') { & (Join-Path $PSScriptRoot 'package-memory.ps1') -Destination $target -InstallerPython $pythonCmd }
+    if ($Runtime -eq 'win-x64') {
+        & (Join-Path $PSScriptRoot 'package-memory.ps1') -Destination $target -InstallerPython $pythonCmd
+        & $pythonCmd (Join-Path $PSScriptRoot 'package-forensics.py') --destination (Join-Path $target 'runtime/tools')
+        if ($LASTEXITCODE -ne 0) { throw 'No se pudieron empaquetar las herramientas forenses.' }
+        Copy-Item -LiteralPath 'vendor/foremost' -Destination (Join-Path $target 'vendor') -Recurse -Force
+    }
     Get-ChildItem -LiteralPath $target -Recurse -File | Where-Object { $_.Name -ne 'PACKAGE_SHA256.csv' } | ForEach-Object {
         [pscustomobject]@{ File=$_.FullName.Substring($target.Length+1); SHA256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash }
     } | Export-Csv -LiteralPath (Join-Path $target 'PACKAGE_SHA256.csv') -Encoding UTF8 -NoTypeInformation

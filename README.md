@@ -2,7 +2,7 @@
 
 **Proyecto de José Luis Cabañas (JLC / UlysesX12).** Copyright © 2026 José Luis Cabañas. Código propio bajo [Volatility Software License 1.0](LICENSE.md). [Autoría y créditos](AUTHORS.md).
 
-Aplicación de escritorio en español para gestionar casos, importar evidencias, verificar SHA-256, analizar RAM Windows con Volatility 3 y preparar informes editables.
+Aplicación de escritorio en español para gestionar casos y evidencias, analizar RAM Windows, recuperar archivos, interpretar extracciones móviles y preparar informes editables. KRONOS significa **Kit de Recolección, Organización y Normalización de Observaciones de Seguridad**.
 
 ## Usar la aplicación en Windows
 
@@ -15,7 +15,7 @@ Si descargas solo el código desde GitHub, el ejecutable no viene en el reposito
 1. Rellena **Nombre del caso** y **Nombre del analista forense**, pulsa **Crear caso…** y elige dónde guardar el caso.
 2. En **Análisis RAM**, pulsa **Importar volcado RAM…** y selecciona el archivo descargado, por ejemplo un `.mem`. KRONOS crea y verifica su copia; no la coloques manualmente en `evidence/`.
 3. Selecciona la evidencia y pulsa **Analizar RAM Windows**.
-4. Revisa los módulos **Información del sistema**, **Procesos**, **Líneas de comando** y **Conexiones de red**. Puedes buscar en las filas y añadir una fila a las notas con su fuente.
+4. Revisa las pestañas de resultados. En **Símbolos y alcance** puedes elegir el perfil básico de cuatro módulos o la investigación ampliada de catorce. Puedes buscar en las filas y añadir una fila a las notas con su fuente.
 5. En **Informe editable**, completa las conclusiones, guarda las notas y genera HTML y Markdown.
 
 La primera ejecución puede necesitar descargar símbolos. El progreso identifica el módulo en curso y permite cancelar. Una extensión no identifica el formato ni garantiza compatibilidad. [Guía del análisis RAM](docs/MEMORIA.md).
@@ -43,7 +43,9 @@ El análisis RAM integrado utiliza Volatility 3, versión **2.28.2** mediante m�
 
 Los módulos de adquisición y análisis de carpetas de artefactos Windows siguen disponibles en **Módulos y adquisición**. La adquisición requiere autorización explícita y privilegios adecuados, con captura RAM desactivada. Importar y analizar un volcado existente no adquiere la RAM del equipo anfitrión.
 
-Pendientes: adquisición RAM integrada, motores de imágenes de disco, análisis Linux/macOS, extracción móvil y descifrado. Las coincidencias no atribuyen autoría.
+El **Laboratorio forense** integra **Foremost 1.5.7-kronos1, FLOSS 3.2.0, ALEAPP 2026.4.5 e iLEAPP 2026.4.6** en la publicación Windows x64. Incluye adaptadores propios de historial de navegadores, inventario ZIP, cadenas con offsets e inventario de particiones RAW. [Guía y cobertura](docs/LABORATORIO.md).
+
+Pendientes: adquisición RAM, exploración completa de sistemas de archivos de discos, EWF, RAID/LVM, adquisición de teléfonos, descifrado y análisis RAM Linux/macOS. No garantiza recuperar cualquier evidencia ni determina automáticamente malicia, autoría, motivos o aficiones.
 
 Consulta [validación y límites](docs/VALIDACION.md) y [dependencias y licencias](docs/THIRD_PARTY_NOTICES.md).
 

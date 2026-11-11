@@ -31,7 +31,7 @@ public sealed partial class MainWindow
         HorizontalAlignment = HorizontalAlignment.Stretch,
         ItemTemplate = new FuncDataTemplate<MemoryModule>((module, _) => new TextBlock
         {
-            Text = module is null ? "" : $"{(module.Plugin.Contains("pslist") ? "Procesos" : module.Plugin.Contains("cmdline") ? "Comandos" : module.Plugin.Contains("netscan") ? "Red" : "Equipo")} ({module.Rows:N0})",
+            Text = module is null ? "" : $"{module.Name} ({module.Rows:N0})",
             FontSize = 15, Margin = new Thickness(6, 2)
         })
     };
@@ -39,6 +39,7 @@ public sealed partial class MainWindow
     private readonly TextBlock memoryHint = new() { Text = "Crea un caso, importa el volcado y ejecuta el análisis Windows.", TextWrapping = TextWrapping.Wrap };
     private readonly DataGrid memoryGrid = new() { IsReadOnly = true, AutoGenerateColumns = false, CanUserResizeColumns = true, GridLinesVisibility = DataGridGridLinesVisibility.Horizontal, MinHeight = 150, FontSize = 15, RowHeight = 32, ColumnHeaderHeight = 36 };
     private readonly CheckBox memoryOffline = new() { Content = "Sin conexión: usar solo símbolos disponibles", IsChecked = false };
+    private readonly CheckBox memoryExtended = new() { Content = "Investigación ampliada: 14 módulos (tarda más)", IsChecked = true };
     private readonly Button memoryCancel = new() { Content = "Cancelar", IsEnabled = false, Margin = new Thickness(0, 3, 10, 3) };
     private MemoryTable? memoryTable;
     private int memoryLoadGeneration;
@@ -88,10 +89,11 @@ public sealed partial class MainWindow
         var searchRow = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), ColumnSpacing = 10 };
         searchRow.Children.Add(memoryQuery); Grid.SetColumn(resultActions, 1); searchRow.Children.Add(resultActions);
         var options = new Expander { Header = "Símbolos y alcance", IsExpanded = false, HorizontalAlignment = HorizontalAlignment.Stretch,
-            Content = new StackPanel { Spacing = 6, Children = { memoryOffline,
+            Content = new StackPanel { Spacing = 6, Children = { memoryOffline, memoryExtended,
                 new TextBlock { Text = "Volatility 3 analiza la copia del caso y comprueba SHA-256 antes y después. Con conexión puede descargar símbolos de Microsoft mediante identificadores técnicos; no envía el volcado. Una extensión no garantiza compatibilidad ni un resultado completo.", FontSize = 12, Foreground = Brushes.LightGray, TextWrapping = TextWrapping.Wrap }
             } } };
-        var controls = new StackPanel { Spacing = 6, Children = { evidenceRow, historyRow, memoryModules, searchRow, options } };
+        var moduleScroll = new ScrollViewer { Content = memoryModules, HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Disabled };
+        var controls = new StackPanel { Spacing = 6, Children = { evidenceRow, historyRow, moduleScroll, searchRow, options } };
         var grid = new Grid { RowDefinitions = new RowDefinitions("Auto,*,Auto"), RowSpacing = 8 };
         grid.Children.Add(controls); Grid.SetRow(memoryGrid, 1); grid.Children.Add(memoryGrid);
         Grid.SetRow(memoryHint, 2); grid.Children.Add(memoryHint);
@@ -125,7 +127,7 @@ public sealed partial class MainWindow
         var c = RequireCase();
         if (memoryEvidence.SelectedItem is not MemoryEvidenceChoice choice) throw new InvalidOperationException("Importa o selecciona primero un volcado de memoria.");
         var analysis = await c.AnalyzeMemoryAsync(choice.Evidence.Id, VolatilityRunner.Discover(), memoryOffline.IsChecked == true,
-            new Progress<string>(message => { status.Text = message; memoryHint.Text = message; }), operationCancellation!.Token);
+            new Progress<string>(message => { status.Text = message; memoryHint.Text = message; }), operationCancellation!.Token, memoryExtended.IsChecked == true);
         results.Text = $"RAM: {analysis.Status}; integridad {analysis.Integrity}\n{analysis.Error}\n" +
             string.Join("\n\n", analysis.Modules.Select(m => $"{m.Name}: {m.Status}; {m.Rows} filas. {m.Error}"));
         memoryRuns.ItemsSource = c.Document.MemoryAnalyses.ToList(); memoryRuns.SelectedItem = analysis;

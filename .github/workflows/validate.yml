@@ -32,6 +32,7 @@ jobs:
       - run: dotnet run --project tests/Kronos.MemoryTests -c Release --no-build -- --real-engine
       - run: python tests/test_legacy.py
       - run: python tests/test_sync_git.py
+      - run: python tests/test_forensics.py
   container:
     runs-on: ubuntu-24.04
     steps:

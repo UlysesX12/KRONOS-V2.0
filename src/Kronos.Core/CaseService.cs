@@ -20,9 +20,14 @@ public sealed class CaseDocument
     public List<Evidence> Evidence { get; set; } = [];
     public List<Operation> Operations { get; set; } = [];
     public List<MemoryAnalysis> MemoryAnalyses { get; set; } = [];
+    public List<ForensicAnalysis> ForensicAnalyses { get; set; } = [];
 }
 public sealed record Evidence(string Id, string Source, string RelativePath, long Size, string Sha256,
-    DateTimeOffset ImportedUtc, DateTimeOffset SourceModifiedUtc, string Method);
+    DateTimeOffset ImportedUtc, DateTimeOffset SourceModifiedUtc, string Method)
+{
+    public string? ParentEvidenceId { get; init; }
+    public string? DerivedFrom { get; init; }
+}
 public sealed record Operation(DateTimeOffset Utc, string Action, string Detail);
 public sealed record Verification(string EvidenceId, string Status, string Detail);
 
@@ -62,11 +67,12 @@ public sealed partial class CaseService : IDisposable
         {
         var document = JsonSerializer.Deserialize<CaseDocument>(await File.ReadAllTextAsync(full), Json)
             ?? throw new InvalidDataException("Documento de caso vacío.");
-        if (document.SchemaVersion != 1 || string.IsNullOrWhiteSpace(document.Id) || document.Evidence is null || document.Operations is null || document.MemoryAnalyses is null)
+        if (document.SchemaVersion != 1 || string.IsNullOrWhiteSpace(document.Id) || document.Evidence is null || document.Operations is null || document.MemoryAnalyses is null || document.ForensicAnalyses is null)
             throw new InvalidDataException("Formato de caso no compatible.");
         var result = new CaseService(root, document, caseLock);
         foreach (var evidence in document.Evidence) result.ResolveEvidence(evidence.RelativePath);
         foreach (var analysis in document.MemoryAnalyses) result.ResolveAnalysisPath(analysis.RelativeDirectory);
+        foreach (var analysis in document.ForensicAnalyses) result.ResolveAnalysisPath(analysis.RelativeDirectory);
         return result;
         }
         catch { caseLock.Dispose(); throw; }
@@ -172,7 +178,7 @@ public sealed partial class CaseService : IDisposable
     {
         var text = new StringBuilder($"# Informe técnico — {Document.DisplayName}\n\nNombre del analista forense: {Document.Operator}\n\nCreación UTC: {Document.CreatedUtc:O}\n\nZona registrada: {Document.TimeZone}\n\nGenerado UTC: {DateTimeOffset.UtcNow:O}\n\n## Metodología y alcance\n\nKRONOS V2.0. Importación de archivos regulares mediante copia y comparación SHA-256 del origen antes/después y del destino. No se identifica el formato por extensión. La verificación posterior compara las copias con el registro del caso, que no constituye un sello ni una firma independiente.\n\n## Evidencias\n\n");
         foreach (var e in Document.Evidence)
-            text.Append($"- ID: {e.Id}\n  Origen: {e.Source}\n  Copia: {e.RelativePath}\n  Bytes: {e.Size}\n  SHA-256: {e.Sha256}\n  Importación UTC: {e.ImportedUtc:O}\n  Método: {e.Method}\n\n");
+            text.Append($"- ID: {e.Id}\n  Origen: {e.Source}\n  Copia: {e.RelativePath}\n  Bytes: {e.Size}\n  SHA-256: {e.Sha256}\n  Importación UTC: {e.ImportedUtc:O}\n  Método: {e.Method}\n  Evidencia padre: {e.ParentEvidenceId}\n  Derivada de: {e.DerivedFrom}\n\n");
         text.AppendLine("## Análisis de memoria RAM\n");
         if (Document.MemoryAnalyses.Count == 0) text.AppendLine("No se ha ejecutado ningún análisis RAM en este caso.\n");
         foreach (var a in Document.MemoryAnalyses)
@@ -181,7 +187,10 @@ public sealed partial class CaseService : IDisposable
             foreach (var module in a.Modules) text.AppendLine($"  - {module.Name} ({module.Plugin}): {module.Status}, {module.Rows} filas, código {module.ExitCode}; fuente {module.ResultsPath}; registro {module.LogPath}; {module.Error}");
             text.AppendLine();
         }
-        text.Append($"## Notas y conclusiones del profesional\n\n{Document.Notes}\n\n## Limitaciones\n\nRAM: módulos Windows de Volatility 3; el alcance depende de los símbolos y de cada módulo. No incluye análisis de imágenes de disco, extracción móvil ni descifrado. Los registros RAM no acreditan por sí solos autoría ni actividad actual. Los módulos de artefactos tienen su propia cobertura y limitaciones. Las coincidencias no atribuyen autoría. Revisar metodología, fuentes y conclusiones antes de emitir un dictamen.\n\n## Operaciones e incidencias\n\n");
+        text.AppendLine("## Laboratorio forense\n");
+        foreach (var a in Document.ForensicAnalyses)
+            text.AppendLine($"- {a.Tool} {a.Version}; análisis {a.Id}; evidencia {a.EvidenceId}; estado {a.Status}; integridad {a.Integrity}; {a.Rows} filas.\n  Inicio UTC: {a.StartedUtc:O}; fin UTC: {a.FinishedUtc:O}\n  SHA-256 previo: {a.SourceSha256Before}\n  SHA-256 posterior: {a.SourceSha256After}\n  Motor SHA-256: {a.ExecutableSha256}\n  Adaptador SHA-256: {a.AdapterSha256}\n  Salidas: {a.RelativeDirectory}\n  Manifiesto SHA-256: {a.OutputsManifestSha256}\n  Cobertura: {a.Coverage}\n  Incidencias: {a.Error}\n");
+        text.Append($"## Notas y conclusiones del profesional\n\n{Document.Notes}\n\n## Limitaciones\n\nRAM: módulos Windows de Volatility 3; depende de símbolos y módulos. Discos: inventario RAW GPT/MBR y firmas, sin exploración completa del sistema de archivos, RAID ni EBR. Foremost recupera candidatos por firmas, potencialmente fragmentados. FLOSS recupera cadenas, sin veredicto de malware. ALEAPP/iLEAPP interpretan extracciones móviles aportadas; revisar cobertura y errores de cada plugin. No adquiere ni desbloquea teléfonos, no descifra volúmenes ni garantiza recuperación de contraseñas. Los registros no acreditan por sí solos autoría, motivos, aficiones ni actividad actual. Revisar fuentes e interpretación antes de emitir un dictamen.\n\n## Operaciones e incidencias\n\n");
         foreach (var op in Document.Operations) text.AppendLine($"- {op.Utc:O} | {op.Action} | {op.Detail}");
         var stem = Path.Combine(Root, "reports", $"informe_{DateTimeOffset.UtcNow:yyyyMMdd_HHmmss}_{Guid.NewGuid():N}");
         Directory.CreateDirectory(Path.GetDirectoryName(stem)!);

@@ -10,5 +10,9 @@ KRONOS V2 es un proyecto de José Luis Cabañas (JLC / UlysesX12). El código pr
 - **SkiaSharp y HarfBuzzSharp:** MIT para bindings y licencias propias de las bibliotecas nativas. https://github.com/mono/SkiaSharp y https://github.com/harfbuzz/harfbuzz. Los avisos disponibles en NuGet se copian durante la publicación.
 - **Windows PowerShell:** componente del sistema para los módulos de adquisición/verificación Windows; no redistribuido.
 - **Módulos originales KRONOS de artefactos:** copyright JLC. Se conservan sus avisos y hashes de procedencia en `vendor/PROVENANCE.md`.
+- **FLOSS 3.2.0:** Mandiant y colaboradores, Apache 2.0; texto en `licenses/FLOSS-LICENSE.txt`. https://github.com/mandiant/flare-floss/tree/v3.2.0. Binario oficial sin modificar.
+- **ALEAPP 2026.4.5 e iLEAPP 2026.4.6:** Alexis Brignoni y colaboradores, MIT; licencias y atribuciones originales en `licenses/ALEAPP-LICENSE.txt`, `licenses/iLEAPP-LICENSE.txt` y sus archivos `*-ATTRIBUTIONS.md`. https://github.com/abrignoni/ALEAPP y https://github.com/abrignoni/iLEAPP. Binarios oficiales sin modificar; retienen las licencias de los componentes que incorporan.
+- **Foremost 1.5.7-kronos1:** autores originales indicados en sus fuentes, incluido el aviso de trabajo del Gobierno de EE. UU. y ausencia de garantía. Fuente y cambios de compatibilidad en `vendor/foremost`, procedencia y condiciones en `vendor/foremost/KRONOS-PATCHES.md`. https://foremost.sourceforge.net/.
+- **Zig 0.15.2:** solo compilador local de publicación, verificado por hash. No se instala globalmente ni se distribuye como parte de KRONOS.
 
 Las licencias de terceros no se sustituyen por la de KRONOS ni se atribuye su autoría al titular del proyecto. La VSL no concede derechos sobre las marcas de Volatility Foundation.

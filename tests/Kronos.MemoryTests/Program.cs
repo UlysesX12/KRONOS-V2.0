@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Jose Luis Cabanas. Volatility Software License 1.0.
 using Kronos.Core;
 
-var root = Path.Combine(Path.GetTempPath(), "kronos-memory-synthetic-" + Guid.NewGuid().ToString("N"));
+var root = Path.GetFullPath(Path.Combine(args.Contains("--forensics") ? ".tools" : Path.GetTempPath(), "kronos-memory-synthetic-" + Guid.NewGuid().ToString("N")));
 Directory.CreateDirectory(root);
 var checks = 0;
 void Check(bool condition, string text) { if (!condition) throw new Exception(text); Console.WriteLine("OK " + text); checks++; }
@@ -17,6 +17,8 @@ try
     var result = await c.AnalyzeMemoryAsync(evidence.Id, engine, true);
     Check(result.Status == "COMPLETO" && result.Integrity == "COINCIDE", "Orquesta los cuatro módulos y verifica SHA-256 antes/después");
     Check(result.Modules.Count == 4 && engine.Calls == 4, "Ejecuta cuatro módulos reales de la interfaz de integración (runner sintético)");
+    var extended = await c.AnalyzeMemoryAsync(evidence.Id, new SyntheticRunner(entry), true, extended: true);
+    Check(extended.Modules.Count == 14 && extended.Status == "COMPLETO" && extended.Modules.Any(m => m.Plugin == "windows.malware.malfind.Malfind"), "Perfil ampliado orquesta catorce módulos, incluidas sesiones y Malfind");
     var table = await c.LoadMemoryTableAsync(result, result.Modules[1]);
     Check(table.TotalRows == 2 && table.Rows[1].JsonPointer == "/0/__children/0", "Conserva filas anidadas y referencias JSON Pointer");
     Check(MemoryTable.Parse(SyntheticRunner.Rows, 1).Rows.Count == 1 && MemoryTable.Parse(SyntheticRunner.Rows, 1).TotalRows == 2, "Limita vista previa sin falsear el total");
@@ -48,6 +50,35 @@ try
         Check(real.EngineVersion == VolatilityRunner.RequiredVersion && real.Modules.Count == 4 && real.Modules[0].ExitCode != 0,
             "Motor Volatility instalado rechaza ceros sintéticos como volcado compatible");
         Check(real.Status == "ERROR" && real.Integrity == "COINCIDE", "Error real del motor no se convierte en análisis correcto ni altera la evidencia");
+    }
+    if (args.Contains("--forensics"))
+    {
+        var fixtures = Path.GetFullPath(".tools/forensic-synthetic");
+        foreach (var (tool, file, expected) in new[] {
+            ("zip", "synthetic.zip", "SYNTHETIC.txt"), ("strings", "carving.bin", "SYNTHETIC"),
+            ("browser", "History", "forensic synthetic"), ("disk", "carving.bin", "Imagen sin tabla"),
+            ("foremost", "carving.bin", "Archivo recuperado"), ("floss", "sample.exe", "KRONOS_SYNTHETIC_FLOSS_MARKER"),
+            ("aleapp", "android.zip", "forensic+synthetic"), ("ileapp", "ios.zip", "SYNTHETIC SAFARI") })
+        {
+            var item = await c.ImportAsync(Path.Combine(fixtures, file));
+            Console.WriteLine("Ejecutando motor real " + tool + " sobre fixture sintético…");
+            var forensic = await c.AnalyzeForensicAsync(item.Id, tool);
+            Check(forensic.Status is "CORRECTO" or "REVISAR COBERTURA", $"Motor real {tool}: {forensic.Status}; {forensic.Error}");
+            Check(forensic.Integrity == "COINCIDE", $"{tool} conserva la evidencia sin modificarla");
+            var forensicTable = await c.LoadForensicTableAsync(forensic);
+            Check(forensicTable.Rows.Any(row => row.Cells.Values.Any(value => value.Contains(expected))), $"{tool} muestra el contenido sintético esperado con fuentes");
+            if (tool == "foremost")
+            {
+                var recovered = forensicTable.Rows.First(row => row.Cells.GetValueOrDefault("Tipo") == "Archivo recuperado por firma");
+                var derived = await c.ImportRecoveredAsync(forensic, recovered.Cells["Fuente"]);
+                Check(derived.ParentEvidenceId == item.Id && derived.DerivedFrom!.Contains(forensic.Id), "Archivo recuperado conserva vínculo a la evidencia padre y análisis");
+                try { await c.ImportRecoveredAsync(forensic, "recovered/../../case.kronos.json"); throw new Exception("Aceptó ruta fuera de manifiesto"); }
+                catch (InvalidDataException) { Check(true, "Rechaza importar rutas no incluidas en el manifiesto"); }
+            }
+            await File.AppendAllTextAsync(c.ResolveAnalysisPath(forensic.RelativeDirectory + "/results.json"), " ");
+            try { await c.LoadForensicTableAsync(forensic); throw new Exception("Aceptó tabla alterada"); }
+            catch (InvalidDataException) { Check(true, $"{tool} detecta manipulación de resultados"); }
+        }
     }
     var exported = await c.ExportReportAsync();
     Check((await File.ReadAllTextAsync(exported)).Contains("Volatility 3") && (await File.ReadAllTextAsync(exported)).Contains("FALLO DE INTEGRIDAD"), "Informe incluye resultados RAM y fallos de integridad");
