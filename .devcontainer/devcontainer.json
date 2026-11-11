@@ -1,0 +1,8 @@
+{
+  "name": "KRONOS V2 · .NET 10",
+  "build": { "dockerfile": "Dockerfile" },
+  "containerEnv": { "DOTNET_CLI_TELEMETRY_OPTOUT": "1", "AVALONIA_TELEMETRY_OPTOUT": "1" },
+  "customizations": { "vscode": { "extensions": ["ms-dotnettools.csharp"] } },
+  "postCreateCommand": "dotnet restore Kronos.sln --locked-mode",
+  "remoteUser": "root"
+}

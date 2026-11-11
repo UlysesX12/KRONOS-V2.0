@@ -1,0 +1,39 @@
+name: Validar KRONOS
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      AVALONIA_TELEMETRY_OPTOUT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: dotnet restore Kronos.sln --locked-mode
+      - run: dotnet build Kronos.sln -c Release --no-restore
+      - run: dotnet run --project tests/Kronos.SmokeTests -c Release --no-build
+      - run: dotnet run --project tests/Kronos.DesktopTests -c Release --no-build
+      - run: python tests/test_legacy.py
+  container:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir el entorno de desarrollo
+        run: docker build -f .devcontainer/Dockerfile -t kronos-dev .
+      - name: Ejecutar las pruebas en el contenedor
+        run: docker run --rm -v "$PWD:/workspaces/kronos" -w /workspaces/kronos kronos-dev sh scripts/test.sh

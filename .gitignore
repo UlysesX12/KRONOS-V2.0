@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+.tools/
+artifacts/
+.vs/
+cases/
+*.user
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example

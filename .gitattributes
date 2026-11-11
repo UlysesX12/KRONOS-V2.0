@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+# Mantener las copias originales byte a byte para comprobar su procedencia.
+vendor/kronos-v1/** -text -whitespace
