@@ -1,5 +1,5 @@
 // Copyright (c) 2026 José Luis Cabañas (JLC / UlysesX12).
-// Todos los derechos reservados sobre las aportaciones propias. Véase LICENSE.md.
+// Distribuido bajo Volatility Software License 1.0. Véase LICENSE.md.
 using Kronos.Core;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,6 +11,11 @@ void Check(bool condition, string message) { if (!condition) throw new Exception
 try
 {
     var source = Path.Combine(parent, "muestra.mem");
+    using (var named = await CaseService.CreateAsync(parent, "Análisis de memoria Windows", "Analista sintético"))
+    {
+        Check(named.Document.DisplayName == "Análisis de memoria Windows", "Nombre de caso admite espacios y tildes");
+        Check(named.Document.Id.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_'), "Código de carpeta compatible sin restringir el nombre visible");
+    }
     await File.WriteAllTextAsync(source, "abc", new UTF8Encoding(false));
     var c = await CaseService.CreateAsync(parent, "TEST_001", "Operador sintético");
     var e = await c.ImportAsync(source);

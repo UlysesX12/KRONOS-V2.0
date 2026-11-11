@@ -1,23 +1,24 @@
-# Aviso de derechos reservados
+# Licencia de KRONOS V2
 
 Copyright (c) 2026 José Luis Cabañas (JLC / UlysesX12).
-Todos los derechos reservados sobre las aportaciones propias a KRONOS.
 
-La publicación de este repositorio no concede una licencia general de uso,
-reproducción, modificación, distribución, sublicencia o explotación comercial
-de las aportaciones propias. Cualquier autorización adicional debe obtenerse
-por escrito de su titular, salvo los derechos reconocidos por la legislación
-aplicable y los concedidos por las condiciones de GitHub para alojar, visualizar
-y realizar forks del repositorio en su servicio.
+El código y la documentación propios de KRONOS V2 se distribuyen bajo la
+**Volatility Software License, versión 1.0 (VSL)**. El titular ha autorizado
+este cambio para incorporar el análisis de memoria con Volatility 3.
 
-En las copias y distribuciones que se autoricen deberán conservarse este aviso,
-la identificación del autor y los avisos de terceros. No se autoriza presentar
-el trabajo ajeno como propio. Dar crédito no sustituye la autorización necesaria.
+Los términos aplicables son los de [Volatility Software License 1.0](licenses/VolatilitySoftwareLicense-1.0.txt),
+cuyo texto se incluye íntegro y sin modificar. Puede consultarse también en
+https://www.volatilityfoundation.org/license/vsl-v1.0.
 
-Los componentes de terceros conservan sus autores, licencias y condiciones.
-Este aviso no restringe los derechos concedidos por sus respectivas licencias
-ni atribuye su autoría al titular de KRONOS. Consulte
-`docs/THIRD_PARTY_NOTICES.md` y los avisos incluidos en cada componente.
+La VSL permite usar, compartir y desarrollar con el software, con las
+condiciones de avisos y publicación de las adiciones que establece su texto.
+Los créditos de José Luis Cabañas se conservan; no se concede autoría sobre
+Volatility ni sobre otros componentes de terceros, ni derechos sobre sus marcas.
 
-Para solicitar permisos, contacte con UlysesX12 a través del repositorio oficial:
-https://github.com/UlysesX12/KRONOS-V2.0
+La licencia se aplica a estas aportaciones de KRONOS V2, incluido el código
+que ejecuta Volatility y procesa sus resultados. Los componentes externos
+conservan sus licencias; consulte `docs/THIRD_PARTY_NOTICES.md`. Las copias
+originales V1 de `vendor/kronos-v1/` conservan sus avisos de procedencia y no
+se modifican con este cambio.
+
+Repositorio oficial y código fuente: https://github.com/UlysesX12/KRONOS-V2.0

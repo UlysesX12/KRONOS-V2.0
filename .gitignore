@@ -10,3 +10,20 @@ __pycache__/
 .env
 .env.*
 !.env.example
+# Evidencias y descargas: nunca publicar volcados con el codigo.
+*.crdownload
+*.mem
+*.raw
+*.dmp
+*.vmem
+*.vmss
+*.vmsn
+*.lime
+*.img
+*.e01
+*.E01
+*.lnk
+KRONOS_*/
+*.zip
+*.7z
+*.rar

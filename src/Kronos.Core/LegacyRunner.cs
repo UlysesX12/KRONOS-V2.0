@@ -1,5 +1,5 @@
 // Copyright (c) 2026 José Luis Cabañas (JLC / UlysesX12).
-// Todos los derechos reservados sobre las aportaciones propias. Véase LICENSE.md.
+// Distribuido bajo Volatility Software License 1.0. Véase LICENSE.md.
 using System.Diagnostics;
 namespace Kronos.Core;
 

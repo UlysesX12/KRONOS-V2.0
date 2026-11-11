@@ -1,10 +1,15 @@
 {
   "dotnet.defaultSolution": "Kronos.sln",
-  "files.exclude": { "**/bin": true, "**/obj": true },
-  "search.exclude": { "**/bin": true, "**/obj": true, ".tools/**": true, "artifacts/**": true },
-  "terminal.integrated.env.windows": {
-    "PATH": "${workspaceFolder}\\.tools\\dotnet;${env:PATH}",
-    "DOTNET_CLI_TELEMETRY_OPTOUT": "1",
-    "AVALONIA_TELEMETRY_OPTOUT": "1"
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    ".tools": true,
+    "artifacts": true
+  },
+  "search.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    ".tools/**": true,
+    "artifacts/**": true
   }
 }

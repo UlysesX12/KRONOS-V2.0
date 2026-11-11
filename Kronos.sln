@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kronos.SmokeTests", "tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kronos.DesktopTests", "tests\Kronos.DesktopTests\Kronos.DesktopTests.csproj", "{0F14E0C5-F0EB-4EB8-ABAA-64B2F7343BB2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kronos.MemoryTests", "tests\Kronos.MemoryTests\Kronos.MemoryTests.csproj", "{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,18 @@ Global
 		{0F14E0C5-F0EB-4EB8-ABAA-64B2F7343BB2}.Release|x64.Build.0 = Release|Any CPU
 		{0F14E0C5-F0EB-4EB8-ABAA-64B2F7343BB2}.Release|x86.ActiveCfg = Release|Any CPU
 		{0F14E0C5-F0EB-4EB8-ABAA-64B2F7343BB2}.Release|x86.Build.0 = Release|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Debug|x64.Build.0 = Debug|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Release|x64.ActiveCfg = Release|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Release|x64.Build.0 = Release|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -82,5 +96,6 @@ Global
 		{0D4C9E5A-9CC1-4C92-BF92-B8566E3258D8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{B61F5E3D-9310-48CC-83A0-959386961E51} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{0F14E0C5-F0EB-4EB8-ABAA-64B2F7343BB2} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{D6889DAF-7DF0-4FD6-A447-66D837AAC4E7} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

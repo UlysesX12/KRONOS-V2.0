@@ -5,12 +5,13 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
+import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-@unittest.skipUnless(os.name == 'nt' and shutil.which('powershell'), 'Script de sincronizacion Windows')
+
 class SyncGitTests(unittest.TestCase):
     def test_initial_sync_and_preservation(self):
         with tempfile.TemporaryDirectory(prefix='kronos-git-fixture-') as temp:
@@ -24,9 +25,9 @@ class SyncGitTests(unittest.TestCase):
 
             git(remote, 'init', '-b', 'main')
             (remote / 'scripts').mkdir()
-            script = (ROOT / 'scripts/sync-git.ps1').read_text(encoding='utf-8')
+            script = (ROOT / 'scripts/sync_git.py').read_text(encoding='utf-8')
             script = script.replace('https://github.com/UlysesX12/KRONOS-V2.0.git', remote.as_posix())
-            (remote / 'scripts/sync-git.ps1').write_text(script, encoding='utf-8')
+            (remote / 'scripts/sync_git.py').write_text(script, encoding='utf-8')
             (remote / '.gitattributes').write_text('* text=auto eol=lf\n', encoding='utf-8')
             (remote / 'sample.txt').write_text('contenido conocido\n', encoding='utf-8')
             git(remote, 'add', '.')
@@ -41,8 +42,8 @@ class SyncGitTests(unittest.TestCase):
                 return folder
 
             def run_sync(folder):
-                return subprocess.run(['powershell', '-NoProfile', '-File',
-                                       str(folder / 'scripts/sync-git.ps1')], capture_output=True,
+                return subprocess.run([sys.executable,
+                                       str(folder / 'scripts/sync_git.py')], capture_output=True,
                                       text=True, encoding='utf-8', errors='replace')
 
             def snapshot(folder):

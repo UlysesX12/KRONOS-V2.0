@@ -1,9 +1,10 @@
 // Copyright (c) 2026 José Luis Cabañas (JLC / UlysesX12).
-// Todos los derechos reservados sobre las aportaciones propias. Véase LICENSE.md.
+// Distribuido bajo Volatility Software License 1.0. Véase LICENSE.md.
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Themes.Fluent;
+using Avalonia.Markup.Xaml.Styling;
 
 namespace Kronos.Desktop;
 internal static class Program
@@ -14,7 +15,12 @@ internal static class Program
 }
 public sealed class App : Application
 {
-    public override void Initialize() { Styles.Add(new FluentTheme()); RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark; }
+    public override void Initialize()
+    {
+        Styles.Add(new FluentTheme());
+        Styles.Add(new StyleInclude(new Uri("avares://Kronos.Desktop")) { Source = new Uri("avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml") });
+        RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark;
+    }
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) desktop.MainWindow = new MainWindow();

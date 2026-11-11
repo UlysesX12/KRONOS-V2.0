@@ -1,36 +1,28 @@
-# Estado y validación — 11 de noviembre de 2026
+# Validación de la versión actual
 
-## Entregado
+KRONOS incluye gestión de casos, copia y verificación de evidencias, análisis RAM Windows con Volatility 3, tabla de resultados con búsqueda, notas con referencias de fuente e informes HTML/Markdown.
 
-Solución C#/.NET 10.0.404 con Avalonia 11.3.22, núcleo independiente de la interfaz y pruebas. Publicación Windows x64 autocontenida en `artifacts/win-x64/`, ejecutable `Kronos.Desktop.exe`; acceso rápido `Iniciar-KRONOS.cmd`. Los archivos de ese directorio deben conservarse juntos. La publicación contiene runtime y bibliotecas nativas, avisos de licencias y manifiesto SHA-256 del paquete. El manifiesto documenta el paquete; no es una firma digital.
+## Pruebas automatizadas
 
-Crear/abrir casos V2, bloqueo de apertura concurrente, copia de archivos con hashes origen antes/después y copia, búsqueda del inventario, verificación de copias, registro de operaciones/errores, notas editables y exportación HTML/Markdown. Los reportes HTML escapan las entradas. Adaptadores para los módulos V1 de verificación Windows, correlación Python y adquisición Windows Triage sin RAM. No se ha ejecutado adquisición real.
+- Núcleo: SHA-256 conocido, origen intacto, copia verificada, persistencia, apertura concurrente, nombres con espacios/tildes, exportación, alteraciones, ausencias, archivos ajenos, rutas fuera del caso y cancelación.
+- RAM: orquestación de cuatro módulos mediante datos sintéticos, referencias JSON Pointer, límite de vista previa, salidas vacías, resultados parciales, rechazo de evidencia alterada, detección de JSON alterado, cancelación, historial e informes.
+- Motor real: Volatility instalado y runtime Python empaquetado rechazan un archivo de ceros sintéticos como imagen compatible; no se transforma ese error en resultados válidos.
+- Interfaz headless: cinco pestañas, recuperación tras un error y tabla RAM que muestra filas verificadas de un caso sintético guardado.
+- Módulos de artefactos: base Chromium SQLite sintética, generación de resultados, fuente intacta y detección de alteración.
+- Sincronización Git: repositorios temporales, historial inicial, conservación de archivos, rechazo de diferencias y protección de commits existentes.
 
-## Comprobaciones realizadas
+Estas pruebas no extraen información de volcados del usuario ni realizan adquisiciones del anfitrión. La prueba funcional de su volcado se realiza desde la interfaz.
 
-- Restauración NuGet en modo bloqueado y compilación Release: cero errores y cero advertencias. Archivos de bloqueo separados para desarrollo y publicación `win-x64`, para evitar que publicar invalide la restauración normal.
-- Núcleo: 13 comprobaciones, incluyendo SHA-256 conocido de `abc`, origen intacto, copia íntegra, apertura concurrente rechazada, persistencia y reapertura, escape HTML, informe editable, copia alterada, archivo ausente, archivo no registrado, ruta fuera del caso, origen inexistente y cancelación sin registro parcial.
-- Interfaz Avalonia headless: ventana y cuatro pestañas renderizadas, interacción con Verificar sin caso, mensaje de error y recuperación de botones; navegación por todas las pestañas. Esto no equivale a una prueba manual completa de selectores de archivos y diálogos del SO.
-- Python: dos pruebas `unittest`. Base Chromium SQLite sintética, visita conocida, generación de observaciones/informe/cobertura, fuente sin cambios y detección de alteración; verificación SHA-256 de todas las copias V1 frente al manifiesto de procedencia.
-- Ejecutable nativo Windows autocontenido: iniciado, ventana `KRONOS V2.0 — Laboratorio forense` identificada también mediante UI Automation, proceso respondiendo y cierre normal. No se efectuó captura del anfitrión.
+## Entorno y ejecución
 
-## Docker y Dev Container
+Desarrollo previsto en Dev Container, con SDK y dependencias fijados. GitHub Actions configura pruebas en Windows, Ubuntu y Docker. Los resultados efectivos de cada revisión se consultan en [Actions](https://github.com/UlysesX12/KRONOS-V2.0/actions); configurar una prueba no significa que ya haya pasado.
 
-Se pudo consultar inicialmente Docker Desktop (`desktop-linux`, motor 29.9.3), listar contenedores vacíos y comprobar Compose v5.7.0. Ejecutar `docker run --rm alpine:3.16.3 ...` devolvió **permission denied** en `npipe:////./pipe/dockerDesktopLinuxEngine`; una consulta posterior también devolvió permiso denegado. Esto demuestra una restricción de acceso de esta sesión, no que el motor esté averiado o detenido.
+La publicación Windows x64 es autocontenida e incorpora Python embebido y el motor RAM. Los avisos de licencia se conservan. Los hashes de dependencias Python están fijados en `engines/memory/requirements.lock`; el archivo del runtime embebido se comprueba mediante SHA-256 durante el empaquetado.
 
-Dev Container preparado con imagen SDK `10.0.404-noble` y digest fijado. Existencia y digest comprobados contra el registro Microsoft (HTTP 200); no se ha construido ni ejecutado el contenedor. El tag Debian inicialmente considerado no existía y se sustituyó por Ubuntu Noble antes de entregar. .NET y Avalonia tienen desactivada la telemetría de compilación en los scripts/Dev Container, evitando escrituras de Avalonia en el perfil del usuario.
+## Limitaciones
 
-La compilación y publicación Windows se completaron con SDK descargado en `.tools/dotnet`, dentro del proyecto, sin instalar un SDK global. La restauración en un PowerShell hijo sufrió una restricción de red; la ejecución directa pudo descargar los paquetes. El script de compilación también se ejecutó después correctamente con las dependencias disponibles.
+El análisis RAM se limita a los módulos Windows integrados y depende de los símbolos disponibles y del soporte real de Volatility. No se garantiza recuperar todo ni atribuir autoría por coincidencias. El rendimiento no mejora automáticamente por integrar el motor en una interfaz.
 
-## Pendiente y límites
+La ventana Windows, los selectores del sistema y un volcado compatible requieren prueba manual. Las pruebas headless no certifican toda la interacción gráfica ni el acceso a hardware. No se ha certificado adquisición RAM, dispositivos físicos, extracción móvil, imágenes de disco ni análisis de RAM Linux/macOS.
 
-- Construir el Dev Container y probar Linux/macOS en sus sistemas reales o VM; no se declara soporte verificado de esos entornos.
-- Prueba manual completa de casos y selectores de archivos en Windows; adquisición V1 en una VM Windows autorizada. No se ha certificado acceso a hardware ni captura RAM.
-- Analizadores avanzados de imágenes de disco/RAM, adquisición Linux/macOS, móviles y descifrado: pendientes, sin controles simulados.
-- Python sigue siendo una dependencia externa del módulo de análisis V1. El núcleo V2 y sus informes funcionan sin Python. PowerShell V1 tiene sus límites originales.
-- V1 y V2 mantienen formatos distintos: el resultado de captura es V1 y los análisis conservan su carpeta separada, referenciada en el historial V2. Las observaciones detalladas V1 se exploran en el informe interactivo existente.
-- El historial JSON no está firmado ni sellado. Las copias del caso son archivos normales y deben custodiarse; Verificar detecta cambios respecto del inventario vigente. Importar un archivo abierto o cambiante puede fallar y no garantiza una instantánea de un sistema activo. No ejecutar archivos de evidencia ni atribuir autoría por coincidencias.
-
-## Siguiente trabajo propuesto
-
-Probar el flujo completo en VM Windows con actividad conocida, ejecutar la matriz Linux/macOS y construir el Dev Container cuando exista acceso a Docker. Después incorporar observaciones estructuradas al núcleo V2 y la visualización nativa de fuentes/cronología, con adaptadores de análisis que declaren cobertura y fallos.
+El historial del caso no está firmado. Una interrupción abrupta puede dejar un análisis en curso o un archivo de evidencia no registrado; conserva el caso completo y verifica su integridad antes de emitir conclusiones.

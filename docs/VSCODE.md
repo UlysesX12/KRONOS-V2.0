@@ -1,29 +1,31 @@
-# Probar KRONOS desde VS Code
+# Desarrollo de KRONOS en VS Code
 
-## En esta carpeta de Windows
+## Abrir el entorno
 
-Abre `Abrir-KRONOS-VSCode.cmd` desde el Explorador. Crea una ventana de VS Code con el SDK local de `.tools/dotnet` disponible para el editor y sus extensiones. Su perfil se guarda en `.tools/vscode-local`; no instala un SDK global ni cambia la configuración del resto de VS Code. Si se solicita confianza, revisa la carpeta y autoriza el código del proyecto para habilitar tareas y depuración.
+1. Inicia Docker Desktop.
+2. En VS Code, abre la carpeta del proyecto.
+3. Instala la extensión **Dev Containers** de Microsoft si falta.
+4. Pulsa `Ctrl+Shift+P` y selecciona **Dev Containers: Reopen in Container**.
+5. Comprueba que abajo a la izquierda aparece **Dev Container: KRONOS V2…**.
 
-En esa ventana:
+La construcción instala .NET, Python y Volatility en el contenedor. La carpeta de código está compartida con el anfitrión; los cambios en ella se conservan.
 
-1. **Ver las pruebas:** `Ctrl+Shift+P` → **Tasks: Run Task / Tareas: Ejecutar tarea** → **KRONOS: Probar**. El terminal muestra el resultado del núcleo, la interfaz headless y los módulos Python. El código de salida debe ser 0.
-2. **Ver la aplicación:** en el mismo menú, **KRONOS: Abrir aplicacion Windows**. Se compila y abre la ventana de KRONOS en Windows. Para depurar, abre Ejecutar y depurar, selecciona **KRONOS: Interfaz Windows (F5)** y pulsa F5. Requiere la extensión C# de Microsoft.
-3. **Compilar:** `Ctrl+Shift+B`, tarea predeterminada **KRONOS: Compilar**.
+## Compilar y probar
 
-Esta opción usa Windows para el editor, las pruebas y la ventana gráfica. El SDK y las dependencias quedan en la carpeta del proyecto; no es ejecución dentro de Docker. Las tareas no ejecutan adquisiciones del anfitrión.
+- `Ctrl+Shift+B`: **KRONOS: Compilar en Dev Container**.
+- `Ctrl+Shift+P` → **Tareas: Ejecutar tarea** → **KRONOS: Probar en Dev Container**.
+- Terminal del contenedor: `sh scripts/test.sh`.
 
-## Probar dentro de Docker
+Las pruebas usan datos sintéticos, incluyendo la tabla RAM y el rechazo de una imagen inválida por el motor real. No analizan volcados del usuario ni ejecutan adquisiciones del anfitrión.
 
-Con Docker Desktop abierto, ejecuta la tarea **KRONOS: Probar dentro de Docker**. Construye la imagen de desarrollo y ejecuta las pruebas dentro del contenedor. No abre la interfaz gráfica.
+Si Docker no permite conectar con su motor, el entorno todavía no se ha abierto: conserva el mensaje de Dev Containers para diagnosticarlo.
 
-Para editar también dentro del contenedor: **Dev Containers: Reopen in Container**. Cuando abajo a la izquierda aparezca el nombre del Dev Container, ejecuta la tarea **KRONOS: Probar**. Dentro de Linux usa `sh scripts/test.sh`. El SDK ya está en la imagen. Abrir una ventana gráfica desde Linux requiere configurar un servidor gráfico.
+## Usar la aplicación
 
-Si Docker devuelve `permission denied` o un error de conexión al motor, las pruebas del contenedor no han comenzado; conserva la salida del terminal para diagnosticar ese acceso.
+Abre `KRONOS.lnk` o `artifacts/win-x64/Kronos.Desktop.exe` desde Windows. No es necesario abrir el editor para usarla. Mantén juntos todos los archivos de la publicación. El flujo de publicación Windows en GitHub Actions prepara un artefacto descargable con el motor incluido.
 
-## Cambios pendientes de Git
+## Sincronizar la carpeta inicial, una sola vez
 
-Los cambios visibles en la carpeta inicial no equivalen a archivos que falten en GitHub: el conector publicó los commits sin actualizar el `.git` local. La carpeta inicial quedó con una rama sin commits.
+Si esta carpeta sigue mostrando todos los archivos como nuevos porque el conector subió los commits sin actualizar el Git local, ejecuta en el Dev Container la tarea **KRONOS: Sincronizar historial inicial con GitHub**.
 
-En un terminal de VS Code con permisos normales del usuario, ejecuta la tarea **KRONOS: Sincronizar historial GitHub Windows**. Añade el remoto si falta, descarga `main` y verifica que cada archivo remoto coincide con el archivo local mediante sus hashes Git y atributos. Solo si todos coinciden, establece el historial local con `git reset --mixed origin/main`, que conserva los archivos de trabajo. No borra archivos, no fuerza una subida y no descarta diferencias. Si ya existen commits locales o hay diferencias, no restablece el historial.
-
-Este paso requiere acceso de escritura a `.git` y conexión con GitHub. La sesión del agente tiene `.git` en solo lectura y no puede completarlo directamente. Las credenciales, si GitHub las solicita, se introducen en el gestor de credenciales del usuario, nunca en archivos del proyecto.
+El script `scripts/sync_git.py` verifica cada archivo frente a `origin/main`. Solo si coinciden y no hay commits locales, establece el historial con `git reset --mixed origin/main`, conservando los archivos. No descarta diferencias, no elimina archivos ni fuerza una subida. La sesión del agente tiene el Git local en solo lectura; esta operación debe ejecutarse desde tu entorno con acceso de escritura.

@@ -25,9 +25,11 @@ jobs:
         with:
           python-version: '3.13'
       - run: dotnet restore Kronos.sln --locked-mode
+      - run: python engines/memory/setup_engine.py --target .tools/memory
       - run: dotnet build Kronos.sln -c Release --no-restore
       - run: dotnet run --project tests/Kronos.SmokeTests -c Release --no-build
       - run: dotnet run --project tests/Kronos.DesktopTests -c Release --no-build
+      - run: dotnet run --project tests/Kronos.MemoryTests -c Release --no-build -- --real-engine
       - run: python tests/test_legacy.py
       - run: python tests/test_sync_git.py
   container:
@@ -38,3 +40,25 @@ jobs:
         run: docker build -f .devcontainer/Dockerfile -t kronos-dev .
       - name: Ejecutar las pruebas en el contenedor
         run: docker run --rm -v "$PWD:/workspaces/kronos" -w /workspaces/kronos kronos-dev sh scripts/test.sh
+  windows-package:
+    needs: [tests, container]
+    runs-on: windows-latest
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+      AVALONIA_TELEMETRY_OPTOUT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Preparar ejecutable con motor RAM incluido
+        run: powershell -NoProfile -File scripts/build.ps1 -Publish -Runtime win-x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KRONOS-windows-x64
+          path: artifacts/win-x64/
+          include-hidden-files: true
+          retention-days: 14

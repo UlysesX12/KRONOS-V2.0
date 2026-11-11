@@ -4,6 +4,8 @@
     <ProjectReference Include="../Kronos.Core/Kronos.Core.csproj"/>
     <PackageReference Include="Avalonia.Desktop" Version="11.3.22"/>
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.22"/>
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="[11.3.13]"/>
     <Content Include="../../vendor/kronos-v1/**/*"><Link>vendor/kronos-v1/%(RecursiveDir)%(Filename)%(Extension)</Link><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
+    <Content Include="../../engines/**/*"><Link>engines/%(RecursiveDir)%(Filename)%(Extension)</Link><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory><CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory></Content>
   </ItemGroup>
 </Project>

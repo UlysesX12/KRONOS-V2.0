@@ -31,6 +31,14 @@
         "resolved": "11.3.2",
         "contentHash": "qHDToxto1e3hci5YqbG9n0Ty8mlp3zBUN5wT66wKqaDVzXyQ0do3EnRILd4Ke9jpvsktaPpgE0YjEk7hornryQ=="
       },
+      "Avalonia.Controls.DataGrid": {
+        "type": "Transitive",
+        "resolved": "11.3.13",
+        "contentHash": "Omfzm3l5ZJQHe1dCuvvadV3LkGmCzImnfOKtoXcDH632jDSwMKRGJ7S+uZRhmu7aBzRxL7PrpIfo4wdDGuzmWA==",
+        "dependencies": {
+          "Avalonia": "11.3.13"
+        }
+      },
       "Avalonia.Desktop": {
         "type": "Transitive",
         "resolved": "11.3.22",
@@ -183,9 +191,10 @@
       "kronos.desktop": {
         "type": "Project",
         "dependencies": {
+          "Avalonia.Controls.DataGrid": "[11.3.13, 11.3.13]",
           "Avalonia.Desktop": "[11.3.22, )",
           "Avalonia.Themes.Fluent": "[11.3.22, )",
-          "Kronos.Core": "[1.0.0, )"
+          "Kronos.Core": "[2.0.0, )"
         }
       }
     }
