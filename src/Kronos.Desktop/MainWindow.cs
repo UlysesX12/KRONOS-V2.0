@@ -37,7 +37,8 @@ public sealed partial class MainWindow : Window
         Background = Brush.Parse("#101823");
         var header = new StackPanel { Spacing = 5, Children = {
             new TextBlock { Text = "K R O N O S   /   V 2.0", FontSize = 24, FontWeight = FontWeight.Bold, Foreground = Brush.Parse("#54D5CB") },
-            new TextBlock { Text = "© 2026 José Luis Cabañas (JLC / UlysesX12) · VSL 1.0 · Motor RAM: Volatility Foundation", Foreground = Brushes.LightGray, FontSize = 11, TextWrapping = TextWrapping.Wrap }
+            new TextBlock { Text = "Kit de Recolección, Organización y Normalización de Observaciones de Seguridad", Foreground = Brushes.LightGray, FontSize = 13, TextWrapping = TextWrapping.Wrap },
+            new TextBlock { Text = "Developed By JLC 2026 UlysesX12", Foreground = Brushes.LightGray, FontSize = 12 }
         }};
         var createBar = new WrapPanel { Orientation = Orientation.Horizontal };
         createBar.Children.Add(caseId); createBar.Children.Add(operatorName);
